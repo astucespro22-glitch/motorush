@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Moto Rush : Turbo Highway</title>
+<style>
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #1e293b;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #334155;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  #hud {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .badge {
+    background: rgba(15, 23, 42, 0.88);
+    color: #fff;
+    padding: 6px 13px;
+    border-radius: 30px;
+    font-weight: 800;
+    font-size: clamp(12px, 3vw, 15px);
+    border: 2px solid #facc15;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  }
+  .score-box {
+    font-size: clamp(17px, 4vw, 23px);
+    color: #facc15;
+  }
+  #zone-banner {
+    position: absolute;
+    top: 54px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(234, 179, 8, 0.94);
+    color: #0f172a;
+    font-weight: 900;
+    font-size: 12px;
+    padding: 4px 15px;
+    border-radius: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    z-index: 10;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    padding: 18px;
+    z-index: 20;
+  }
+  .hidden { display: none !important; }
+  h1 {
+    font-size: clamp(24px, 6vw, 44px);
+    color: #facc15;
+    text-shadow: 0 4px 0 #b45309, 0 8px 15px rgba(0,0,0,0.6);
+    margin-bottom: 8px;
+  }
+  .daily-tag {
+    background: #22c55e;
+    color: #052e16;
+    font-weight: 900;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  p.subtitle {
+    font-size: clamp(13px, 3.2vw, 16px);
+    color: #cbd5e1;
+    max-width: 520px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .moto-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .moto-btn {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid #475569;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .moto-btn.active {
+    border-color: #facc15;
+    background: rgba(250, 204, 21, 0.25);
+  }
+  .btn {
+    background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
+    color: #0f172a;
+    border: 3px solid #fff;
+    padding: 13px 34px;
+    font-size: clamp(16px, 4vw, 20px);
+    font-weight: 900;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #a16207, 0 12px 20px rgba(0,0,0,0.4);
+    text-transform: uppercase;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #a16207; }
+  .btn-share {
+    background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+    color: #fff;
+    border-color: #bbf7d0;
+    box-shadow: 0 5px 0 #14532d;
+    font-size: clamp(13px, 3.2vw, 15px);
+    padding: 11px 22px;
+    margin-top: 12px;
+  }
+  .stats-grid {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.1);
+    padding: 9px 15px;
+    border-radius: 14px;
+    border: 1px solid rgba(250, 204, 21, 0.4);
+  }
+  .stat-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+  .stat-val { font-size: clamp(18px, 4.5vw, 24px); font-weight: 900; color: #facc15; }
+  .controls-hint {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    color: rgba(255,255,255,0.92);
+    font-size: clamp(11px, 2.8vw, 13px);
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <div id="hud">
+    <div class="badge">🏆 <span id="best-score">0</span></div>
+    <div class="badge score-box"><span id="current-score">0</span> m</div>
+    <div class="badge">🪙 <span id="coin-count">0</span> | 🔥 <span id="streak-count">1</span>j</div>
+  </div>
+  <div id="zone-banner">🏁 CENTRE-VILLE EXPRESS</div>
+
+  <canvas id="gameCanvas"></canvas>
+  <div class="controls-hint">👆 TAPEZ SUR L'ÉCRAN (OU FLÈCHES) POUR CHANGER DE VOIE</div>
+
+  <div id="start-screen" class="overlay">
+    <div class="daily-tag">⚡ Défi du jour • Zéro inscription</div>
+    <h1>🏍️ MOTO RUSH</h1>
+    <p class="subtitle">
+      Fonce à pleine vitesse sur l'autoroute urbaine !<br>
+      👆 <b>1 seul contrôle</b> : Tape à gauche ou à droite pour esquiver le trafic et collecter un maximum de <b>pièces d'or</b> !
+    </p>
+    <div class="moto-selector">
+      <button class="moto-btn active" id="moto-classic">🔴 Moto Sport Rouge</button>
+      <button class="moto-btn" id="moto-vip">👑 Superbike Dorée (🔒 Inviter 1 ami)</button>
+    </div>
+    <button class="btn" id="start-btn">DÉMARRER LA COURSE</button>
+  </div>
+
+  <div id="gameover-screen" class="overlay hidden">
+    <h1 style="color:#ef4444;">CRASH !</h1>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Distance</div>
+        <div class="stat-val" id="final-score" style="color:#fff;">0 m</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pièces</div>
+        <div class="stat-val" id="final-coins">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Record</div>
+        <div class="stat-val" id="final-best">0 m</div>
+      </div>
+    </div>
+    <button class="btn" id="restart-btn">REJOUER</button>
+    <button class="btn btn-share" id="share-btn">🎁 DÉFIER 1 AMI & DÉBLOQUER LA SUPERBIKE</button>
+  </div>
+</div>
+
+<script>
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playSound(type) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+
+  if (type === 'switch') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(520, now + 0.08);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+    osc.start(now); osc.stop(now + 0.09);
+  } else if (type === 'coin') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(987, now);
+    osc.frequency.setValueAtTime(1318, now + 0.06);
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.start(now); osc.stop(now + 0.22);
+  } else if (type === 'turbo') {
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(660, now + 0.3);
+    gain.gain.setValueAtTime(0.09, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+    osc.start(now); osc.stop(now + 0.32);
+  } else if (type === 'crash') {
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, now);
+    osc.frequency.linearRampToValueAtTime(55, now + 0.4);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
+    osc.start(now); osc.stop(now + 0.42);
+  }
+}
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let width = 420;
+let height = 700;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  width = rect.width;
+  height = rect.height;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+let gameState = 'START';
+let distance = 0;
+let coins = 0;
+let bestScore = parseInt(localStorage.getItem('motorush_best')) || 0;
+let speed = 6.5;
+let frameCount = 0;
+let turboTimer = 0;
+
+let vipUnlocked = localStorage.getItem('motorush_vip_unlocked') === 'true';
+let currentMoto = localStorage.getItem('motorush_moto') || 'classic';
+
+function updateMotoUI() {
+  const btnClassic = document.getElementById('moto-classic');
+  const btnVip = document.getElementById('moto-vip');
+  btnVip.textContent = vipUnlocked ? '👑 Superbike Dorée (Débloquée)' : '👑 Superbike Dorée (🔒 Inviter 1 ami)';
+  btnClassic.classList.toggle('active', currentMoto === 'classic');
+  btnVip.classList.toggle('active', currentMoto === 'vip');
+}
+updateMotoUI();
+
+document.getElementById('moto-classic').addEventListener('click', () => {
+  currentMoto = 'classic';
+  localStorage.setItem('motorush_moto', 'classic');
+  updateMotoUI();
+});
+
+document.getElementById('moto-vip').addEventListener('click', () => {
+  if (vipUnlocked) {
+    currentMoto = 'vip';
+    localStorage.setItem('motorush_moto', 'vip');
+    updateMotoUI();
+  } else {
+    shareAndUnlock();
+  }
+});
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  const lastPlay = localStorage.getItem('motorush_last_play');
+  let streak = parseInt(localStorage.getItem('motorush_streak')) || 1;
+  if (lastPlay && lastPlay !== today) {
+    const diff = (new Date(today) - new Date(lastPlay)) / (1000 * 60 * 60 * 24);
+    streak = diff === 1 ? streak + 1 : 1;
+  }
+  localStorage.setItem('motorush_last_play', today);
+  localStorage.setItem('motorush_streak', streak);
+  return streak;
+}
+const currentStreak = updateStreak();
+document.getElementById('best-score').textContent = bestScore;
+document.getElementById('streak-count').textContent = currentStreak;
+
+let currentLane = 1;
+let playerX = 0;
+
+function getRoadMetrics() {
+  const margin = Math.max(8, Math.min(width * 0.02, 24));
+  const roadX = margin;
+  const roadW = width - margin * 2;
+  const laneW = roadW / 3;
+  return { roadX, roadW, laneW };
+}
+
+function getLaneCenter(lane) {
+  const { roadX, laneW } = getRoadMetrics();
+  return roadX + laneW * lane + laneW / 2;
+}
+
+function getEntityScale() {
+  const { laneW } = getRoadMetrics();
+  return Math.max(1, Math.min(laneW / 135, 1.45));
+}
+
+let items = [];
+let particles = [];
+
+function spawnRow() {
+  const blockedLanes = [];
+  const numObstacles = Math.random() > 0.45 ? 2 : 1;
+
+  while (blockedLanes.length < numObstacles) {
+    const lane = Math.floor(Math.random() * 3);
+    if (!blockedLanes.includes(lane)) {
+      blockedLanes.push(lane);
+      const types = ['car', 'oil', 'cone', 'truck'];
+      const type = types[Math.floor(Math.random() * types.length)];
+      items.push({ kind: 'obstacle', type, lane, y: -110 });
+    }
+  }
+
+  const freeLanes = [0, 1, 2].filter(l => !blockedLanes.includes(l));
+  if (freeLanes.length > 0 && Math.random() > 0.25) {
+    const bonusLane = freeLanes[Math.floor(Math.random() * freeLanes.length)];
+    const isTurbo = Math.random() < 0.14;
+    items.push({ kind: isTurbo ? 'turbo' : 'coin', lane: bonusLane, y: -110 });
+  }
+}
+
+function createBurst(x, y, color) {
+  for (let i = 0; i < 12; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 9,
+      vy: (Math.random() - 0.5) * 9,
+      life: 22,
+      color
+    });
+  }
+}
+
+function drawRoad() {
+  const { roadX, roadW, laneW } = getRoadMetrics();
+
+  ctx.fillStyle = '#15803d';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = '#334155';
+  ctx.fillRect(roadX, 0, roadW, height);
+
+  ctx.fillStyle = '#facc15';
+  ctx.fillRect(roadX, 0, 6, height);
+  ctx.fillRect(roadX + roadW - 6, 0, 6, height);
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.lineWidth = 4;
+  ctx.setLineDash([34, 28]);
+  ctx.lineDashOffset = -(frameCount * speed);
+
+  for (let i = 1; i <= 2; i++) {
+    const lx = roadX + laneW * i;
+    ctx.beginPath();
+    ctx.moveTo(lx, 0);
+    ctx.lineTo(lx, height);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+function drawPlayer() {
+  const targetX = getLaneCenter(currentLane);
+  if (playerX === 0) playerX = targetX;
+  playerX += (targetX - playerX) * 0.25;
+
+  const py = height - 125;
+  const s = getEntityScale();
+
+  ctx.save();
+  ctx.translate(playerX, py);
+  ctx.scale(s, s);
+
+  if (turboTimer > 0) {
+    ctx.fillStyle = 'rgba(250, 204, 21, 0.35)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 48, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-7, -36, 14, 18);
+  ctx.fillRect(-8, 18, 16, 20);
+
+  ctx.fillStyle = currentMoto === 'vip' ? '#f59e0b' : '#dc2626';
+  ctx.beginPath();
+  ctx.roundRect(-14, -22, 28, 44, 8);
+  ctx.fill();
+
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(-22, -14);
+  ctx.lineTo(22, -14);
+  ctx.stroke();
+
+  ctx.fillStyle = '#fef08a';
+  ctx.beginPath();
+  ctx.arc(0, -25, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = currentMoto === 'vip' ? '#ffffff' : '#3b82f6';
+  ctx.beginPath();
+  ctx.roundRect(-16, -6, 32, 24, 8);
+  ctx.fill();
+
+  ctx.fillStyle = currentMoto === 'vip' ? '#facc15' : '#1e293b';
+  ctx.beginPath();
+  ctx.arc(0, 2, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function updateAndDrawItems() {
+  const py = height - 125;
+  const s = getEntityScale();
+
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    it.y += (it.kind === 'obstacle' && it.type === 'car' ? speed * 1.15 : speed);
+    const ix = getLaneCenter(it.lane);
+
+    ctx.save();
+    ctx.translate(ix, it.y);
+    ctx.scale(s, s);
+
+    if (it.kind === 'coin') {
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, 0, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.fillStyle = '#854d0e';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('$', 0, 5);
+    } else if (it.kind === 'turbo') {
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.roundRect(-16, -19, 32, 38, 6);
+      ctx.fill();
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚡', 0, 5);
+    } else if (it.kind === 'obstacle') {
+      if (it.type === 'car') {
+        ctx.fillStyle = '#eab308';
+        ctx.beginPath();
+        ctx.roundRect(-24, -36, 48, 72, 8);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-19, -19, 38, 15);
+        ctx.fillRect(-19, 11, 38, 13);
+      } else if (it.type === 'truck') {
+        ctx.fillStyle = '#2563eb';
+        ctx.beginPath();
+        ctx.roundRect(-27, -46, 54, 92, 6);
+        ctx.fill();
+        ctx.fillStyle = '#93c5fd';
+        ctx.fillRect(-21, -34, 42, 15);
+      } else if (it.type === 'oil') {
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 26, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else if (it.type === 'cone') {
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(-26, -11, 52, 22);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-17, -11, 11, 22);
+        ctx.fillRect(6, -11, 11, 22);
+      }
+    }
+    ctx.restore();
+
+    const hit = Math.abs(playerX - ix) < 34 * s && Math.abs(py - it.y) < 44 * s;
+    if (hit) {
+      if (it.kind === 'coin') {
+        const gain = currentMoto === 'vip' ? 2 : 1;
+        coins += gain;
+        playSound('coin');
+        createBurst(ix, it.y, '#facc15');
+        items.splice(i, 1);
+        continue;
+      } else if (it.kind === 'turbo') {
+        turboTimer = 260;
+        playSound('turbo');
+        createBurst(ix, it.y, '#facc15');
+        items.splice(i, 1);
+        continue;
+      } else if (it.kind === 'obstacle') {
+        if (turboTimer > 0) {
+          coins += 1;
+          playSound('coin');
+          createBurst(ix, it.y, '#f97316');
+          items.splice(i, 1);
+          continue;
+        } else {
+          triggerGameOver();
+          return;
+        }
+      }
+    }
+
+    if (it.y > height + 110) items.splice(i, 1);
+  }
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, 6, 6);
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function updateZoneBanner() {
+  const banner = document.getElementById('zone-banner');
+  if (distance < 300) banner.textContent = '🏁 CENTRE-VILLE EXPRESS';
+  else if (distance < 700) banner.textContent = '🌉 GRAND PONT SUSPENDU';
+  else if (distance < 1200) banner.textContent = '🛣️ AUTOROUTE DU NORD';
+  else banner.textContent = '🌊 BOULEVARD CÔTIER';
+}
+
+function gameLoop() {
+  if (gameState !== 'PLAYING') return;
+  frameCount++;
+
+  if (frameCount % 4 === 0) {
+    distance += turboTimer > 0 ? 3 : 2;
+    updateZoneBanner();
+  }
+  if (frameCount % 260 === 0 && speed < 14) speed += 0.45;
+  if (turboTimer > 0) turboTimer--;
+
+  const spawnRate = Math.max(34, Math.floor(62 - speed * 2));
+  if (frameCount % spawnRate === 0) spawnRow();
+
+  document.getElementById('current-score').textContent = distance;
+  document.getElementById('coin-count').textContent = coins;
+
+  drawRoad();
+  updateAndDrawItems();
+  drawPlayer();
+
+  requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+  initAudio();
+  resizeCanvas();
+  gameState = 'PLAYING';
+  distance = 0;
+  coins = 0;
+  speed = 6.5;
+  frameCount = 0;
+  turboTimer = 0;
+  currentLane = 1;
+  playerX = getLaneCenter(1);
+  items = [];
+  particles = [];
+
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('gameover-screen').classList.add('hidden');
+  gameLoop();
+}
+
+function triggerGameOver() {
+  gameState = 'GAMEOVER';
+  playSound('crash');
+  if (distance > bestScore) {
+    bestScore = distance;
+    localStorage.setItem('motorush_best', bestScore);
+    document.getElementById('best-score').textContent = bestScore;
+  }
+  document.getElementById('final-score').textContent = distance + ' m';
+  document.getElementById('final-coins').textContent = coins;
+  document.getElementById('final-best').textContent = bestScore + ' m';
+  document.getElementById('gameover-screen').classList.remove('hidden');
+}
+
+function shareAndUnlock() {
+  vipUnlocked = true;
+  currentMoto = 'vip';
+  localStorage.setItem('motorush_vip_unlocked', 'true');
+  localStorage.setItem('motorush_moto', 'vip');
+  updateMotoUI();
+  const text = encodeURIComponent(`🏍️ J'ai parcouru ${distance}m et collecté ${coins} pièces sur Moto Rush : Turbo Highway ! Peux-tu battre mon record ? Joue ici : ${window.location.href}`);
+  window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+}
+
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('restart-btn').addEventListener('click', startGame);
+document.getElementById('share-btn').addEventListener('click', shareAndUnlock);
+
+const container = document.getElementById('game-container');
+container.addEventListener('pointerdown', (e) => {
+  if (gameState !== 'PLAYING' || e.target.tagName === 'BUTTON') return;
+  const tapX = e.clientX;
+  if (tapX < width / 2) {
+    if (currentLane > 0) { currentLane--; playSound('switch'); }
+    else { currentLane = 1; playSound('switch'); }
+  } else {
+    if (currentLane < 2) { currentLane++; playSound('switch'); }
+    else { currentLane = 1; playSound('switch'); }
+  }
+});
+
+window.addEventListener('keydown', (e) => {
+  if (gameState !== 'PLAYING') return;
+  if (e.code === 'ArrowLeft' && currentLane > 0) { currentLane--; playSound('switch'); }
+  if (e.code === 'ArrowRight' && currentLane < 2) { currentLane++; playSound('switch'); }
+});
+
+drawRoad();
+drawPlayer();
+</script>
+</body>
+</html>
