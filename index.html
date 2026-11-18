@@ -12,6 +12,7 @@
     background: #1e293b;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
+    touch-action: none;
   }
   #game-container {
     position: relative;
@@ -39,7 +40,7 @@
   .badge {
     background: rgba(15, 23, 42, 0.88);
     color: #fff;
-    padding: 6px 13px;
+    padding: 6px 12px;
     border-radius: 30px;
     font-weight: 800;
     font-size: clamp(12px, 3vw, 15px);
@@ -53,18 +54,18 @@
     font-size: clamp(17px, 4vw, 23px);
     color: #facc15;
   }
-  #zone-banner {
+  #phase-badge {
     position: absolute;
     top: 54px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(234, 179, 8, 0.94);
-    color: #0f172a;
+    background: rgba(15, 23, 42, 0.9);
+    color: #4ade80;
+    border: 1.5px solid #4ade80;
     font-weight: 900;
     font-size: 12px;
-    padding: 4px 15px;
+    padding: 4px 14px;
     border-radius: 20px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
     z-index: 10;
     pointer-events: none;
     white-space: nowrap;
@@ -72,7 +73,7 @@
   .overlay {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.92);
+    background: rgba(15, 23, 42, 0.93);
     backdrop-filter: blur(5px);
     display: flex;
     flex-direction: column;
@@ -80,37 +81,50 @@
     align-items: center;
     text-align: center;
     color: white;
-    padding: 18px;
+    padding: 16px;
     z-index: 20;
+    overflow-y: auto;
   }
   .hidden { display: none !important; }
   h1 {
-    font-size: clamp(24px, 6vw, 44px);
+    font-size: clamp(22px, 5.5vw, 40px);
     color: #facc15;
     text-shadow: 0 4px 0 #b45309, 0 8px 15px rgba(0,0,0,0.6);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
-  .daily-tag {
-    background: #22c55e;
-    color: #052e16;
+  .howto-card {
+    background: rgba(30, 41, 59, 0.9);
+    border: 2px solid rgba(250, 204, 21, 0.55);
+    border-radius: 16px;
+    padding: 12px 16px;
+    max-width: 480px;
+    width: 100%;
+    margin-bottom: 14px;
+    text-align: left;
+  }
+  .howto-title {
+    font-size: 13px;
     font-weight: 900;
-    font-size: 12px;
-    padding: 4px 12px;
-    border-radius: 12px;
-    margin-bottom: 12px;
+    color: #facc15;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-align: center;
   }
-  p.subtitle {
-    font-size: clamp(13px, 3.2vw, 16px);
-    color: #cbd5e1;
-    max-width: 520px;
-    margin-bottom: 16px;
-    line-height: 1.5;
+  .howto-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: clamp(12px, 2.9vw, 14px);
+    color: #e2e8f0;
+    line-height: 1.35;
   }
+  .howto-list li b { color: #fff; }
   .moto-selector {
     display: flex;
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 8px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -118,9 +132,9 @@
     background: rgba(255,255,255,0.1);
     border: 2px solid #475569;
     color: #fff;
-    padding: 8px 14px;
+    padding: 7px 12px;
     border-radius: 12px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
   }
@@ -132,8 +146,8 @@
     background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
     color: #0f172a;
     border: 3px solid #fff;
-    padding: 13px 34px;
-    font-size: clamp(16px, 4vw, 20px);
+    padding: 12px 32px;
+    font-size: clamp(15px, 3.8vw, 19px);
     font-weight: 900;
     border-radius: 50px;
     cursor: pointer;
@@ -146,23 +160,23 @@
     color: #fff;
     border-color: #bbf7d0;
     box-shadow: 0 5px 0 #14532d;
-    font-size: clamp(13px, 3.2vw, 15px);
-    padding: 11px 22px;
+    font-size: clamp(12px, 3vw, 14px);
+    padding: 10px 20px;
     margin-top: 12px;
   }
   .stats-grid {
     display: flex;
     gap: 10px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
   .stat-card {
     background: rgba(255,255,255,0.1);
-    padding: 9px 15px;
+    padding: 9px 14px;
     border-radius: 14px;
     border: 1px solid rgba(250, 204, 21, 0.4);
   }
   .stat-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
-  .stat-val { font-size: clamp(18px, 4.5vw, 24px); font-weight: 900; color: #facc15; }
+  .stat-val { font-size: clamp(18px, 4.5vw, 23px); font-weight: 900; color: #facc15; }
   .controls-hint {
     position: absolute;
     bottom: 10px;
@@ -184,18 +198,22 @@
     <div class="badge score-box"><span id="current-score">0</span> m</div>
     <div class="badge">🪙 <span id="coin-count">0</span> | 🔥 <span id="streak-count">1</span>j</div>
   </div>
-  <div id="zone-banner">🏁 CENTRE-VILLE EXPRESS</div>
+  <div id="phase-badge">🟢 FACILE • 00:00</div>
 
   <canvas id="gameCanvas"></canvas>
-  <div class="controls-hint">👆 TAPEZ SUR L'ÉCRAN (OU FLÈCHES) POUR CHANGER DE VOIE</div>
+  <div class="controls-hint">👆 TOUCHEZ LA VOIE OU GLISSEZ LE DOIGT (◀ / ▶)</div>
 
   <div id="start-screen" class="overlay">
-    <div class="daily-tag">⚡ Défi du jour • Zéro inscription</div>
     <h1>🏍️ MOTO RUSH</h1>
-    <p class="subtitle">
-      Fonce à pleine vitesse sur l'autoroute urbaine !<br>
-      👆 <b>1 seul contrôle</b> : Tape à gauche ou à droite pour esquiver le trafic et collecter un maximum de <b>pièces d'or</b> !
-    </p>
+    <div class="howto-card">
+      <div class="howto-title">📋 Comment jouer (Mode d'emploi)</div>
+      <ul class="howto-list">
+        <li>👆 <b>Changer de voie :</b> Touche directement <b>Gauche</b>, <b>Milieu</b> ou <b>Droite</b> sur l'écran, ou glisse le doigt (◀ ▶).</li>
+        <li>🚧 <b>Éviter :</b> Esquive les voitures, camions, flaques et travaux sur la route.</li>
+        <li>⚡ <b>Bonus :</b> Ramasse les <b>pièces d'or ($)</b> et attrape l'éclair <b>Turbo ⚡</b> pour foncer sans danger !</li>
+        <li>⏱️ <b>Progression :</b> 1 min <b>Facile</b> → 2 min <b>Moyen</b> → puis mode <b>Rapide</b> !</li>
+      </ul>
+    </div>
     <div class="moto-selector">
       <button class="moto-btn active" id="moto-classic">🔴 Moto Sport Rouge</button>
       <button class="moto-btn" id="moto-vip">👑 Superbike Dorée (🔒 Inviter 1 ami)</button>
@@ -211,8 +229,8 @@
         <div class="stat-val" id="final-score" style="color:#fff;">0 m</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Pièces</div>
-        <div class="stat-val" id="final-coins">0</div>
+        <div class="stat-label">Temps</div>
+        <div class="stat-val" id="final-time" style="color:#38bdf8;">00:00</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Record</div>
@@ -294,9 +312,15 @@ let gameState = 'START';
 let distance = 0;
 let coins = 0;
 let bestScore = parseInt(localStorage.getItem('motorush_best')) || 0;
-let speed = 6.5;
+let speed = 4.2;
 let frameCount = 0;
 let turboTimer = 0;
+let startTime = 0;
+let elapsedSeconds = 0;
+let difficultyStage = 'EASY';
+let laneHighlight = -1;
+let highlightTimer = 0;
+let tutorialAlpha = 1;
 
 let vipUnlocked = localStorage.getItem('motorush_vip_unlocked') === 'true';
 let currentMoto = localStorage.getItem('motorush_moto') || 'classic';
@@ -363,25 +387,59 @@ function getEntityScale() {
   return Math.max(1, Math.min(laneW / 135, 1.45));
 }
 
+function formatTime(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function updateDifficultyByTime() {
+  elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+  const badge = document.getElementById('phase-badge');
+
+  if (elapsedSeconds < 60) {
+    difficultyStage = 'EASY';
+    speed = 4.2 + (elapsedSeconds / 60) * 1.0;
+    badge.textContent = `🟢 FACILE • ${formatTime(elapsedSeconds)}`;
+    badge.style.color = '#4ade80';
+    badge.style.borderColor = '#4ade80';
+  } else if (elapsedSeconds < 180) {
+    difficultyStage = 'MEDIUM';
+    const progress = (elapsedSeconds - 60) / 120;
+    speed = 5.8 + progress * 2.2;
+    badge.textContent = `🟡 MOYEN • ${formatTime(elapsedSeconds)}`;
+    badge.style.color = '#facc15';
+    badge.style.borderColor = '#facc15';
+  } else {
+    difficultyStage = 'FAST';
+    const progress = Math.min((elapsedSeconds - 180) / 120, 1);
+    speed = 8.8 + progress * 3.2;
+    badge.textContent = `🔴 RAPIDE • ${formatTime(elapsedSeconds)}`;
+    badge.style.color = '#f87171';
+    badge.style.borderColor = '#f87171';
+  }
+}
+
 let items = [];
 let particles = [];
+let nextSpawnFrame = 60;
 
 function spawnRow() {
   const blockedLanes = [];
-  const numObstacles = Math.random() > 0.45 ? 2 : 1;
+  const maxObstacles = difficultyStage === 'EASY' ? 1 : (Math.random() > 0.45 ? 2 : 1);
 
-  while (blockedLanes.length < numObstacles) {
+  while (blockedLanes.length < maxObstacles) {
     const lane = Math.floor(Math.random() * 3);
     if (!blockedLanes.includes(lane)) {
       blockedLanes.push(lane);
-      const types = ['car', 'oil', 'cone', 'truck'];
+      const types = difficultyStage === 'EASY' ? ['cone', 'oil', 'car'] : ['car', 'oil', 'cone', 'truck'];
       const type = types[Math.floor(Math.random() * types.length)];
       items.push({ kind: 'obstacle', type, lane, y: -110 });
     }
   }
 
   const freeLanes = [0, 1, 2].filter(l => !blockedLanes.includes(l));
-  if (freeLanes.length > 0 && Math.random() > 0.25) {
+  if (freeLanes.length > 0 && Math.random() > 0.2) {
     const bonusLane = freeLanes[Math.floor(Math.random() * freeLanes.length)];
     const isTurbo = Math.random() < 0.14;
     items.push({ kind: isTurbo ? 'turbo' : 'coin', lane: bonusLane, y: -110 });
@@ -409,6 +467,12 @@ function drawRoad() {
   ctx.fillStyle = '#334155';
   ctx.fillRect(roadX, 0, roadW, height);
 
+  if (highlightTimer > 0 && laneHighlight >= 0) {
+    ctx.fillStyle = `rgba(250, 204, 21, ${0.2 * (highlightTimer / 15)})`;
+    ctx.fillRect(roadX + laneW * laneHighlight, 0, laneW, height);
+    highlightTimer--;
+  }
+
   ctx.fillStyle = '#facc15';
   ctx.fillRect(roadX, 0, 6, height);
   ctx.fillRect(roadX + roadW - 6, 0, 6, height);
@@ -426,14 +490,37 @@ function drawRoad() {
     ctx.stroke();
   }
   ctx.setLineDash([]);
+
+  // Repères tactiles visuels sur mobile pendant les 6 premières secondes
+  if (gameState === 'PLAYING' && elapsedSeconds < 6 && tutorialAlpha > 0) {
+    if (elapsedSeconds >= 4) tutorialAlpha = Math.max(0, tutorialAlpha - 0.015);
+    const labels = ['◀ GAUCHE', 'MILIEU', 'DROITE ▶'];
+    ctx.save();
+    ctx.globalAlpha = tutorialAlpha * 0.75;
+    for (let l = 0; l < 3; l++) {
+      const cx = getLaneCenter(l);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+      ctx.beginPath();
+      ctx.roundRect(cx - laneW * 0.4, height - 68, laneW * 0.8, 30, 10);
+      ctx.fill();
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(labels[l], cx, height - 49);
+    }
+    ctx.restore();
+  }
 }
 
 function drawPlayer() {
   const targetX = getLaneCenter(currentLane);
   if (playerX === 0) playerX = targetX;
-  playerX += (targetX - playerX) * 0.25;
+  playerX += (targetX - playerX) * 0.28;
 
-  const py = height - 125;
+  const py = height - 135;
   const s = getEntityScale();
 
   ctx.save();
@@ -482,12 +569,12 @@ function drawPlayer() {
 }
 
 function updateAndDrawItems() {
-  const py = height - 125;
+  const py = height - 135;
   const s = getEntityScale();
 
   for (let i = items.length - 1; i >= 0; i--) {
     const it = items[i];
-    it.y += (it.kind === 'obstacle' && it.type === 'car' ? speed * 1.15 : speed);
+    it.y += (it.kind === 'obstacle' && it.type === 'car' ? speed * 1.12 : speed);
     const ix = getLaneCenter(it.lane);
 
     ctx.save();
@@ -549,7 +636,7 @@ function updateAndDrawItems() {
     }
     ctx.restore();
 
-    const hit = Math.abs(playerX - ix) < 34 * s && Math.abs(py - it.y) < 44 * s;
+    const hit = Math.abs(playerX - ix) < 30 * s && Math.abs(py - it.y) < 38 * s;
     if (hit) {
       if (it.kind === 'coin') {
         const gain = currentMoto === 'vip' ? 2 : 1;
@@ -592,27 +679,21 @@ function updateAndDrawItems() {
   }
 }
 
-function updateZoneBanner() {
-  const banner = document.getElementById('zone-banner');
-  if (distance < 300) banner.textContent = '🏁 CENTRE-VILLE EXPRESS';
-  else if (distance < 700) banner.textContent = '🌉 GRAND PONT SUSPENDU';
-  else if (distance < 1200) banner.textContent = '🛣️ AUTOROUTE DU NORD';
-  else banner.textContent = '🌊 BOULEVARD CÔTIER';
-}
-
 function gameLoop() {
   if (gameState !== 'PLAYING') return;
   frameCount++;
+  updateDifficultyByTime();
 
   if (frameCount % 4 === 0) {
     distance += turboTimer > 0 ? 3 : 2;
-    updateZoneBanner();
   }
-  if (frameCount % 260 === 0 && speed < 14) speed += 0.45;
   if (turboTimer > 0) turboTimer--;
 
-  const spawnRate = Math.max(34, Math.floor(62 - speed * 2));
-  if (frameCount % spawnRate === 0) spawnRow();
+  if (frameCount >= nextSpawnFrame) {
+    spawnRow();
+    const gap = difficultyStage === 'EASY' ? 95 : (difficultyStage === 'MEDIUM' ? 68 : 48);
+    nextSpawnFrame = frameCount + gap;
+  }
 
   document.getElementById('current-score').textContent = distance;
   document.getElementById('coin-count').textContent = coins;
@@ -630,9 +711,14 @@ function startGame() {
   gameState = 'PLAYING';
   distance = 0;
   coins = 0;
-  speed = 6.5;
+  speed = 4.2;
   frameCount = 0;
+  nextSpawnFrame = 55;
   turboTimer = 0;
+  tutorialAlpha = 1;
+  startTime = Date.now();
+  elapsedSeconds = 0;
+  difficultyStage = 'EASY';
   currentLane = 1;
   playerX = getLaneCenter(1);
   items = [];
@@ -652,7 +738,7 @@ function triggerGameOver() {
     document.getElementById('best-score').textContent = bestScore;
   }
   document.getElementById('final-score').textContent = distance + ' m';
-  document.getElementById('final-coins').textContent = coins;
+  document.getElementById('final-time').textContent = formatTime(elapsedSeconds);
   document.getElementById('final-best').textContent = bestScore + ' m';
   document.getElementById('gameover-screen').classList.remove('hidden');
 }
@@ -663,7 +749,7 @@ function shareAndUnlock() {
   localStorage.setItem('motorush_vip_unlocked', 'true');
   localStorage.setItem('motorush_moto', 'vip');
   updateMotoUI();
-  const text = encodeURIComponent(`🏍️ J'ai parcouru ${distance}m et collecté ${coins} pièces sur Moto Rush : Turbo Highway ! Peux-tu battre mon record ? Joue ici : ${window.location.href}`);
+  const text = encodeURIComponent(`🏍️ J'ai parcouru ${distance}m (${formatTime(elapsedSeconds)}) sur Moto Rush : Turbo Highway ! Peux-tu battre mon record ? Joue ici : ${window.location.href}`);
   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 
@@ -671,23 +757,53 @@ document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('restart-btn').addEventListener('click', startGame);
 document.getElementById('share-btn').addEventListener('click', shareAndUnlock);
 
+// Contrôle mobile hybride : Tap direct sur la voie OU glissement (swipe) gauche/droite
+let touchStartX = null;
+let swiped = false;
 const container = document.getElementById('game-container');
+
 container.addEventListener('pointerdown', (e) => {
   if (gameState !== 'PLAYING' || e.target.tagName === 'BUTTON') return;
-  const tapX = e.clientX;
-  if (tapX < width / 2) {
-    if (currentLane > 0) { currentLane--; playSound('switch'); }
-    else { currentLane = 1; playSound('switch'); }
-  } else {
-    if (currentLane < 2) { currentLane++; playSound('switch'); }
-    else { currentLane = 1; playSound('switch'); }
+  touchStartX = e.clientX;
+  swiped = false;
+
+  const rect = container.getBoundingClientRect();
+  const relX = e.clientX - rect.left;
+  const targetLane = Math.min(2, Math.max(0, Math.floor((relX / rect.width) * 3)));
+  if (targetLane !== currentLane) {
+    currentLane = targetLane;
+    laneHighlight = targetLane;
+    highlightTimer = 15;
+    playSound('switch');
   }
+});
+
+container.addEventListener('pointermove', (e) => {
+  if (gameState !== 'PLAYING' || touchStartX === null || swiped) return;
+  const diffX = e.clientX - touchStartX;
+  if (Math.abs(diffX) > 28) {
+    swiped = true;
+    if (diffX < 0 && currentLane > 0) {
+      currentLane--; laneHighlight = currentLane; highlightTimer = 15; playSound('switch');
+    } else if (diffX > 0 && currentLane < 2) {
+      currentLane++; laneHighlight = currentLane; highlightTimer = 15; playSound('switch');
+    }
+  }
+});
+
+container.addEventListener('pointerup', () => {
+  touchStartX = null;
+  swiped = false;
 });
 
 window.addEventListener('keydown', (e) => {
   if (gameState !== 'PLAYING') return;
-  if (e.code === 'ArrowLeft' && currentLane > 0) { currentLane--; playSound('switch'); }
-  if (e.code === 'ArrowRight' && currentLane < 2) { currentLane++; playSound('switch'); }
+  if (e.code === 'ArrowLeft' && currentLane > 0) {
+    currentLane--; laneHighlight = currentLane; highlightTimer = 15; playSound('switch');
+  }
+  if (e.code === 'ArrowRight' && currentLane < 2) {
+    currentLane++; laneHighlight = currentLane; highlightTimer = 15; playSound('switch');
+  }
 });
 
 drawRoad();
